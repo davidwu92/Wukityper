@@ -18,7 +18,6 @@ const TypeTest = () => {
   // Story Selection function; sets storyString to the contents of a story to type.
   const storySelected = () => {
     setTypedWords([])
-    setLineBreakCount(0)
     switch (document.getElementById(`storySelect`).value) {
       case `0`:
         setStoryString(aboutString)
@@ -49,33 +48,23 @@ const TypeTest = () => {
   // Issue with string splitting method.
   const storyFunction = () => <>
   {
-    storyString.split(" ").map((word, index, array)=>(
-      word.includes("↵")?
-      <>
-        <span className={index<typedWords.length-lineBreakCount-1 ? "blue-text":""}>{word.split("↵")[0]}</span>
-        <br/>
-        <span className={index<typedWords.length-lineBreakCount-1 ? "blue-text":""}>{word.split("↵")[1]}{" "}</span>
+    storyString.replace(/↵/g, "↵ ").split(" ").map((word, index, array)=>(
+      word[word.length-1]==="↵"?
+      <>{index<typedWords.length-1 ? 
+        <><span className="grey-text">{word.slice(0,-1)}</span><br/></>
+        :<><span className={index==typedWords.length-1?"green-text":""}>{word.slice(0,-1)}</span><br/></>}
       </>
-      :
-      <><span className={index<typedWords.length-lineBreakCount-1 ? "blue-text":""}>{word}{" "}</span></>
+      :<>
+        {index<typedWords.length-1 ?
+        <><span className="grey-text">{word}{" "}</span></>
+        :<><span className={index==typedWords.length-1 ? "green-text":""}>{word}{" "}</span></>
+        }
+      </>
     ))
   }
   </>
-
-  // Issue with string splitting method.
-  // const storyFunction = () => 
-  // <>
-  //   {storyString.split("").map((character, index)=>(
-  //     character==="↵"?<br/>
-  //     :
-  //     index<typedWords.join("").length ? 
-  //       <span className={typedWords.join("")[index]===character?"blue-text":"red-text"}>{character}</span>
-  //       :<span>{character}</span>
-  //   ))}
-  // </>
   
   const [typedWords, setTypedWords] = useState([])
-  const [lineBreakCount, setLineBreakCount]=useState(0)
 
   const handleKeyDown = (e) =>{//this function will handle special key presses in the typing area.
     // console.log(e.keyCode)
@@ -85,10 +74,6 @@ const TypeTest = () => {
       if (typedWords[0]){
         let newArray = typedWords
         if(typedWords[typedWords.length-1]===""){ //if the last thing typed was space/enter...
-          let previousString = newArray[newArray.length-2]
-          if(previousString[previousString.length-1]==="↵"){
-            setLineBreakCount(lineBreakCount=>lineBreakCount-1)
-          }
           let previousWord = newArray[newArray.length-2].length>1 ? 
             newArray[newArray.length-2].slice(0, -1):""
           newArray.splice(-2,2, previousWord)
@@ -105,11 +90,11 @@ const TypeTest = () => {
       console.log("HandleKeyDown: TYPED WORDS:")
       console.log(typedWords)
     }
-    // if (e.keyCode === 9){console.log("You pressed Tab.")}
+    if (e.keyCode === 9){e.preventDefault()} //pressed Tab.
     // if (e.keyCode === 13){console.log("You pressed Enter.")}
     // if (e.keyCode === 16){console.log("You pressed Shift.")}
     // if (e.keyCode === 17){console.log("You pressed Control.")}
-    // if (e.keyCode === 18){console.log("You pressed Alt.")}
+    if (e.keyCode === 18){e.preventDefault()}
     // if(e.keyCode === 32){console.log("You pressed Space.")}
   }
   const handleKeyPress = (e) => {//this function will handle any non-special key presses. Gives charCodes.
@@ -134,7 +119,6 @@ const TypeTest = () => {
         document.getElementById("typedString").innerHTML = null
       } else if (e.charCode === 13){ //when Enter is pressed...
         e.preventDefault()
-        setLineBreakCount(lineBreakCount=>lineBreakCount+1)
         //add "↵" to last element...
         newArray[newArray.length-1] = newArray[newArray.length-1] + "↵"
         newArray[newArray.length] = ""
@@ -155,9 +139,11 @@ const TypeTest = () => {
     {typedWords.length ? typedWords.map((word, index, array)=>(
       word[word.length-1]!=="↵" ? 
           storyString.split(/↵| /)[index]!==word.slice(0,-1) && index<array.length-1 ?
-          <><span className="red-text"><u>{word.slice(0,-1)}</u>{" "}</span></>:<span>{word}</span>
+            <><span className="red-text"><u>{word.slice(0,-1)}</u>{" "}</span></>
+            :<span>{word}</span>
         : storyString.split(/↵| /)[index]!==word.slice(0,-1) && index<array.length-1 ?
-        <><span className="red-text"><u>{word.slice(0,-1)}</u></span><br/></>:<><span>{word.slice(0,-1)}</span><br/></>
+          <><span className="red-text"><u>{word.slice(0,-1)}</u></span><br/></>
+          :<><span>{word.slice(0,-1)}</span><br/></>
     )):null}
   </>
 
@@ -201,22 +187,28 @@ const TypeTest = () => {
       {/* TYPING TEST: story content, typing area */}
       <div style={{border: "black", borderWidth: "3px", borderStyle:"double", padding:"5px"}}>
         {/* Story content */}
-        <div id="testStoryArea" style={{overflowX: "scroll", height:"30vh"}}>
+        <div id="testStoryArea" style={{overflowY: "scroll", height:"25vh", lineHeight:"1.7"}}>
           {storyFunction()}
         </div>
         
         {/* Typing area as a DIV */}
-        <div style={{textIndent:"2px", width:"100%", border:"black", overflowX:"auto",
+        <div style={{width:"100%", border:"black",
               borderStyle:"solid", borderWidth:"1px", margin:"5px 0px 0px 0px"}}>
             {/* Previously-typed words appear here. */}
             {typedFunction()}
 
             {/* editable typing area: 1 character at a time. */}
-            <div style={{display: "inline-block", backgroundColor:"antiquewhite", margin:"none", 
-                        border:"none", minWidth:"5px"}}
-              id="typedString" contentEditable name="typedString" 
+            <div style={ typedWords[0]?
+                  {textIndent:"4px", display: "inline-block", backgroundColor:"antiquewhite", margin:"none", 
+                    border:"none", width:"5px"}
+                  :{textIndent:"4px", display: "inline-block", backgroundColor:"antiquewhite", margin:"0", 
+                        border:"none", width:"inherit", color:"grey"}
+                }
+              id="typedString" name="typedString" contentEditable 
+              //add a timer, disable these functions when time runs out.
               onKeyDown={handleKeyDown}
-              onKeyPress={handleKeyPress}></div>
+              onKeyPress={handleKeyPress}>{typedWords[0]?null:"Start typing here to begin the test."}
+              </div>
         </div>
 
       </div>
@@ -224,7 +216,6 @@ const TypeTest = () => {
       <div>
         <button onClick={()=>{console.log(typedWords)}}>check typedWords</button>
         <button onClick={()=>{console.log(storyString.split(" "))}}>see storyString</button>
-        <button onClick={()=>{console.log(lineBreakCount)}}>see linebreakcount</button>
       </div>
     </div>
   )
