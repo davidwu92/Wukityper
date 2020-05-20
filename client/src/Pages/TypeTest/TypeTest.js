@@ -12,7 +12,7 @@ const TypeTest = () => {
   }
 
   //storyString contains the story to be typed. Empty string if no story selected.
-  const aboutString =`About David's Typing Test↵This is where your selected story will appear. The word you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" symbol), they should turn grey.↵The test ends after one minute of typing, and counts the number of words you were able to type correctly. Each incorrectly-typed word will appear in your typing area in red, and will tick up the total number of incorrectly-typed words. Once the test ends, you'll see your typing rate in words per minute (wpm) and typing accuracy as a percentage of the total words typed.`
+  const aboutString =`About David's Typing Test↵This is where the article you chose will appear. The word you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" symbol), they should turn grey.↵The test ends after one minute of typing, and counts the number of words you were able to type correctly. Each incorrectly-typed word will appear in your typing area in red, and will tick up the total number of incorrectly-typed words. Once the test ends, you'll see your typing rate in words per minute (wpm) and typing accuracy as a percentage of the total words typed.`
   const [storyString, setStoryString] = useState(aboutString)
 
   // Story Selection function; sets storyString to the contents of a story to type.
@@ -45,7 +45,7 @@ const TypeTest = () => {
     }
   }
 
-  // Issue with string splitting method.
+  // This function renders the story string.
   const storyFunction = () => <>
   {
     storyString.replace(/↵/g, "↵ ").split(" ").map((word, index, array)=>(
@@ -134,15 +134,15 @@ const TypeTest = () => {
       console.log(typedWords)
     }
   }
-
+  //this function tracks your progress and shows what you've typed.
   const typedFunction = () => <>
     {typedWords.length ? typedWords.map((word, index, array)=>(
       word[word.length-1]!=="↵" ? 
           storyString.split(/↵| /)[index]!==word.slice(0,-1) && index<array.length-1 ?
-            <><span className="red-text"><u>{word.slice(0,-1)}</u>{" "}</span></>
+            <><span className="red-text" data-mistake="mistake"><u>{word.slice(0,-1)}</u>{" "}</span></>
             :<span>{word}</span>
         : storyString.split(/↵| /)[index]!==word.slice(0,-1) && index<array.length-1 ?
-          <><span className="red-text"><u>{word.slice(0,-1)}</u></span><br/></>
+          <><span className="red-text" data-mistake="mistake"><u>{word.slice(0,-1)}</u></span><br/></>
           :<><span>{word.slice(0,-1)}</span><br/></>
     )):null}
   </>
@@ -195,7 +195,7 @@ const TypeTest = () => {
         <div style={{width:"100%", border:"black",
               borderStyle:"solid", borderWidth:"1px", margin:"5px 0px 0px 0px"}}>
             {/* Previously-typed words appear here. */}
-            {typedFunction()}
+            <div id="typedWordsDiv" style={{display:"inline"}}>{typedFunction()}</div>
 
             {/* editable typing area: 1 character at a time. */}
             <div style={ typedWords[0]?
@@ -216,6 +216,8 @@ const TypeTest = () => {
       <div>
         <button onClick={()=>{console.log(typedWords)}}>check typedWords</button>
         <button onClick={()=>{console.log(storyString.split(" "))}}>see storyString</button>
+        <button onClick={()=>{console.log(document.getElementById("typedWordsDiv").innerHTML)}}>seeTypedWordsDiv</button>
+        <button onClick={()=>{console.log(document.getElementById("typedWordsDiv").innerHTML.split(`data-mistake="mistake"`).length -1)}}>countMistakes</button>
       </div>
     </div>
   )
