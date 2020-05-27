@@ -23,7 +23,7 @@ const TypeTest = () => {
     let params = {
         action: "query",
         prop:"extracts",
-        exsentences:"60",
+        exsentences:"10",
         exlimit: "1",
         titles: title,
         explaintext:"1",
@@ -37,18 +37,21 @@ const TypeTest = () => {
     const response = await fetch(url);
     const jsonRes = await response.json();
     // console.log(JSON.stringify(jsonRes));
+    console.log(jsonRes);
     let scrapedString = Object.values(jsonRes.query.pages)[0].extract
 
     // console.log(scrapedString)
     let arr = scrapedString.split("\n")
     let formattedStory = arr.join("↵")
+    //NOTE TO SELF: could do more formatting to ensure new sentences begin with spaces and we omit any special characters.
+
     setStoryString(formattedStory)
     // const jsonText = await response.text();
     // console.log(jsonText)
   }
 
   //storyString contains the story to be typed. Empty string if no story selected.
-  const aboutString =`About David's Typing Test↵This is where the article you chose will appear. The word you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" symbol), they should turn grey.↵The test ends after one minute of typing, and counts the number of words you were able to type correctly. Each incorrectly-typed word will appear in your typing area in red, and will tick up the total number of incorrectly-typed words. Once the test ends, you'll see your typing rate in words per minute (wpm) and typing accuracy as a percentage of the total words typed.`
+  const aboutString =`About David's Typing Test↵Start by selecting an article category from the dropdown menu. The summary of a random Wikipedia article from the selected category will appear in this text box, and you'll have as much time as you wish to read through its contents before you begin typing. Once you type something into the yellow box, the timer will start and the typing test will commence!↵The word (or character) you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" arrow), the typed words will turn grey. Incorrectly-typed words will show up in underlined, red text in your typing area. You cannot use the arrow keys to move the text cursor, nor can you use keyboard shortcuts such as Control+Shift+LeftArrow or Shift+Home to mass edit previously typed words; however, you are free to press the backspace key to re-type words. You can practice now by typing the words in this tutorial to get a feel for how both the typing area and the article area function!↵The test ends once the timer hits 0 or when the entire article has been typed: whichever comes first. The total number of correctly-typed words will count towards your typing speed. Your typing speed will be measured in words per minute (wpm). Meanwhile, the total number of words typed incorrectly (without being fixed) will adversely affect your accuracy. Your accuracy will be calculated as a percentage: correctly-typed words divided by total number of typed words.↵That's all there is to know about David's Typing test! I hope you enjoy this fun, possibly-educational typing test.`
   const [storyString, setStoryString] = useState(aboutString)
 
   // Story Selection function; sets storyString to the contents of a story to type.
@@ -272,14 +275,15 @@ const TypeTest = () => {
       </div>
 
       {/* TYPING TEST: story content, typing area */}
-      <div style={{border: "black", borderWidth: "3px", borderStyle:"double", padding:"5px"}}>
+      <div style={{border: "black", borderWidth: "3px", borderStyle:"double", padding:"5px", fontSize:"large"}}>
         {/* Story content */}
         <div id="testStoryArea" style={{overflowY: "scroll", height:"25vh", lineHeight:"1.7"}}>
+          {typedWords.length && document.getElementById("storySelect").value!=="0" ? null:<div style={{display:"inline"}} id="articleScrollPoint"/>}
           {storyFunction()}
         </div>
         
         {/* Typing area as a DIV */}
-        <div style={{width:"100%", border:"black", maxHeight: "6em",
+        <div className="blue lighten-4" style={{width:"100%", border:"black", maxHeight: "6em",
               borderStyle:"solid", borderWidth:"1px", margin:"5px 0px 0px 0px", overflowY:"scroll"}}>
             {/* Previously-typed words appear here. */}
             <div id="typedWordsDiv" style={{display:"inline"}}>{typedFunction()}</div>
