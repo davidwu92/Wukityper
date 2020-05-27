@@ -1,14 +1,50 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 import UserAPI from '../../utils/ScoreAPI'; //for sending results to db
 // import { set } from 'mongoose';
 import "./TypeTest.css"
+import axios from 'axios';
 
 const TypeTest = () => {
   // nameState contains username. that's it.
   const [nameState, setNameState] = useState({username: ""})
   nameState.handleInputChange = (e) => {
     setNameState({[e.target.name]: e.target.value, testContent: nameState.testContent})
+  }
+
+  //SCRAPING FUNCTIONS
+  async function getArticle(titleArray){
+    let title = "Barack_Obama"
+    if(titleArray.length){
+      title = titleArray[Math.floor(Math.random()*titleArray.length)]
+    }
+    console.log(title)
+    let url = "https://en.wikipedia.org/w/api.php"; 
+    let params = {
+        action: "query",
+        prop:"extracts",
+        exsentences:"60",
+        exlimit: "1",
+        titles: title,
+        explaintext:"1",
+        // formatversion:"2",
+        format:"json",
+    };
+
+    url = url + "?origin=*";
+    Object.keys(params).forEach(function(key){url += "&" + key + "=" + params[key];});
+    console.log(url)
+    const response = await fetch(url);
+    const jsonRes = await response.json();
+    // console.log(JSON.stringify(jsonRes));
+    let scrapedString = Object.values(jsonRes.query.pages)[0].extract
+
+    // console.log(scrapedString)
+    let arr = scrapedString.split("\n")
+    let formattedStory = arr.join("↵")
+    setStoryString(formattedStory)
+    // const jsonText = await response.text();
+    // console.log(jsonText)
   }
 
   //storyString contains the story to be typed. Empty string if no story selected.
@@ -18,46 +54,85 @@ const TypeTest = () => {
   // Story Selection function; sets storyString to the contents of a story to type.
   const storySelected = () => {
     setTypedWords([])
+    let titleArray = []
     switch (document.getElementById(`storySelect`).value) {
       case `0`:
         setStoryString(aboutString)
         break;
       case `story1`:
-        setStoryString(`Story 1: The story of Bob and the rabbits.↵Bob was once a proud farmer who loved to shoot pesky rabbits.`)
+        titleArray = ["United_States_Bill_of_Rights", "Constitution_of_the_United_States",
+        "First_Amendment_to_the_United_States_Constitution", "Second_Amendment_to_the_United_States_Constitution",
+        "Third_Amendment_to_the_United_States_Constitution", "Fourth_Amendment_to_the_United_States_Constitution",
+        "Fifth_Amendment_to_the_United_States_Constitution", "Sixth_Amendment_to_the_United_States_Constitution",
+        "Seventh_Amendment_to_the_United_States_Constitution", "Eighth_Amendment_to_the_United_States_Constitution",
+        "Ninth_Amendment_to_the_United_States_Constitution", "Tenth_Amendment_to_the_United_States_Constitution",
+      ]
         break;
       case `story2`:
-        setStoryString(`Story 2: The preamble to the constitution.`)
+        titleArray = ["George_Washington", "Abraham_Lincoln", "John_Adams", "Barack_Obama", "Thomas_Jefferson"]
         break;
       case `story3`:
-        setStoryString(`Story 3: A summary of our Bill of Rights.`)
+        titleArray = ["C._S._Lewis", "J._K._Rowling", "J._R._R._Tolkien", "Lewis_Carroll"]
         break;
       case `story4`:
-        setStoryString(`Story 4: The Declaration of Independence.`)
+        titleArray = ["Special_relativity", "Electromagnetic_spectrum", "Photosynthesis",
+        "Gravity", "Chemical_bond", "Molecule", "Chemical_element", "Periodic_table"]
         break;
       case `story5`:
-        setStoryString(`Story 5: How to build a house.`)
+        titleArray = ["Sigmund_Freud"]
         break;
       case `story6`:
-        setStoryString(`Story 6: The story of Adam and Eve.`)
+        titleArray = ["Moon", "Jupiter", "Mercury_(planet)", "Venus", "Mars", "Saturn", "Sun","Uranus","Neptune", "Pluto"]
+        break;
+      case `story7`:
+        titleArray = ["Batman", "Superman","Wonder_Woman","Flash_(comics)","Green_Lantern", "Aquaman",
+        "Dick_Grayson", "Catwoman","Barbara_Gordon","Green_Arrow","Roy_Harper_(character)","Justice_League",
+      "Captain_Marvel_(DC_Comics)", "Black_Lightning","Joker_(character)","Deathstroke","Lex_Luthor","Suicide_Squad","Riddler"]
         break;
       default:
         setStoryString(aboutString)
+        break;
     }
+    getArticle(titleArray)
   }
 
   // This function renders the story string.
   const storyFunction = () => <>
   {
     storyString.replace(/↵/g, "↵ ").split(" ").map((word, index, array)=>(
-      word[word.length-1]==="↵"?
-      <>{index<typedWords.length-1 ? 
-        <><span className="grey-text">{word.slice(0,-1)}</span><br/></>
-        :<><span className={index==typedWords.length-1?"green-text":""}>{word.slice(0,-1)}</span><br/></>}
+      word[word.length-1]==="↵"? //if the word ends with Return symbol...
+      <>{
+        index<typedWords.length-1 ? 
+        <><span className="grey-text">{word}</span><br/></> //word.slice(0,-1) turns off Return symbols.
+        :
+        <>
+          {/* <span className={index==typedWords.length-1?"green-text":""}>{word}</span><br/> */}
+          {index===typedWords.length-1 ?
+          <>
+            <span className="green-text">{word}</span><div style={{display:"inline"}} id="articleScrollPoint"/><br/>
+          </>
+          :<>
+            <span>{word}</span><br/>
+          </>}
+        </>
+        }
       </>
       :<>
-        {index<typedWords.length-1 ?
+        {
+        index<typedWords.length-1 ? //if there's no return symbol.
         <><span className="grey-text">{word}{" "}</span></>
-        :<><span className={index==typedWords.length-1 ? "green-text":""}>{word}{" "}</span></>
+        :
+        <>
+          {/* <span className={index===typedWords.length-1 ? "green-text":""}>{word}{" "}</span> */}
+          {index===typedWords.length-1 ? 
+          <>
+            <span className="green-text">{word}{" "}</span><div style={{display:"inline"}} id="articleScrollPoint"/>
+          </>
+          :
+          <>
+            <span>{word}{" "}</span>
+          </>}
+        </>
         }
       </>
     ))
@@ -87,8 +162,8 @@ const TypeTest = () => {
           document.getElementById("typedString").innerHTML = null
         }
       }
-      console.log("HandleKeyDown: TYPED WORDS:")
-      console.log(typedWords)
+      // console.log("HandleKeyDown: TYPED WORDS:")
+      // console.log(typedWords)
     }
     if (e.keyCode === 9){e.preventDefault()} //pressed Tab.
     // if (e.keyCode === 13){console.log("You pressed Enter.")}
@@ -103,7 +178,7 @@ const TypeTest = () => {
     // console.log(e.key)
     if(!typedWords.length){ //if typedWords is empty...
       //only set typedWords if the first key is nonspace, nonenter.
-      if(e.charCode!=32 && e.charCode!=13){
+      if(e.charCode!==32 && e.charCode!==13){
         e.preventDefault()
         setTypedWords([e.key])
         document.getElementById("typedString").innerHTML = null
@@ -130,8 +205,8 @@ const TypeTest = () => {
         setTypedWords(JSON.parse(JSON.stringify(newArray)))
         document.getElementById("typedString").innerHTML = null
       }
-      console.log("HandlekeyPress: TYPED WORDS: ")
-      console.log(typedWords)
+      // console.log("HandlekeyPress: TYPED WORDS: ")
+      // console.log(typedWords)
     }
   }
   //this function tracks your progress and shows what you've typed.
@@ -146,6 +221,17 @@ const TypeTest = () => {
           :<><span>{word.slice(0,-1)}</span><br/></>
     )):null}
   </>
+
+
+  //Scroll To Bottom of typing area.
+  const typeAreaRef = useRef(null)
+  const scrollToBottom = () => {
+    typeAreaRef.current.scrollIntoView({ behavior: "smooth" })
+    if(document.getElementById("articleScrollPoint")){
+      document.getElementById("articleScrollPoint").scrollIntoView({behavior:"smooth", block:"center"})
+    }
+  }
+  useEffect(scrollToBottom, [typedWords])
 
   return(
     <div className="container">
@@ -173,13 +259,14 @@ const TypeTest = () => {
           }}
           onChange={storySelected}
         >
-          <option value="0" selected>Select Story</option>
-          <option value="story1">Story 1</option>
-          <option value="story2">Story 2</option>
-          <option value="story3">Story 3</option>
-          <option value="story4">Story 4</option>
-          <option value="story5">Story 5</option>
-          <option value="story6">Story 6</option>
+          <option value="0" selected>Select Article</option>
+          <option value="story1">US Historic Documents</option>
+          <option value="story2">US Presidents</option>
+          <option value="story3">Famous Authors</option>
+          <option value="story4">Physics, Chemistry, and Biology</option>
+          <option value="story5">Famous Psychologists</option>
+          <option value="story6">Celestial Bodies in our Solar System</option>
+          <option value="story7">DC Comics Characters</option>
         </select>
 
       </div>
@@ -192,8 +279,8 @@ const TypeTest = () => {
         </div>
         
         {/* Typing area as a DIV */}
-        <div style={{width:"100%", border:"black",
-              borderStyle:"solid", borderWidth:"1px", margin:"5px 0px 0px 0px"}}>
+        <div style={{width:"100%", border:"black", maxHeight: "6em",
+              borderStyle:"solid", borderWidth:"1px", margin:"5px 0px 0px 0px", overflowY:"scroll"}}>
             {/* Previously-typed words appear here. */}
             <div id="typedWordsDiv" style={{display:"inline"}}>{typedFunction()}</div>
 
@@ -209,6 +296,9 @@ const TypeTest = () => {
               onKeyDown={handleKeyDown}
               onKeyPress={handleKeyPress}>{typedWords[0]?null:"Start typing here to begin the test."}
               </div>
+            
+            {/* dummy component for scrolling to bottom */}
+            <div ref={typeAreaRef}/>
         </div>
 
       </div>
@@ -218,6 +308,8 @@ const TypeTest = () => {
         <button onClick={()=>{console.log(storyString.split(" "))}}>see storyString</button>
         <button onClick={()=>{console.log(document.getElementById("typedWordsDiv").innerHTML)}}>seeTypedWordsDiv</button>
         <button onClick={()=>{console.log(document.getElementById("typedWordsDiv").innerHTML.split(`data-mistake="mistake"`).length -1)}}>countMistakes</button>
+        {/* <button onClick={getArticle}>get article</button> */}
+        {/* <button onClick={getTitle}>get title</button> */}
       </div>
     </div>
   )
