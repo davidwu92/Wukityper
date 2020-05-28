@@ -44,7 +44,7 @@ const TypeTest = () => {
     let arr = scrapedString.split("\n")
     let formattedStory = arr.join("↵")
     //NOTE TO SELF: could do more formatting to ensure new sentences begin with spaces and we omit any special characters.
-
+    console.log(formattedStory)
     setStoryString(formattedStory)
     // const jsonText = await response.text();
     // console.log(jsonText)
@@ -193,6 +193,7 @@ const TypeTest = () => {
         //add " " to last element...
         newArray[newArray.length-1] = newArray[newArray.length-1] + " "
         newArray[newArray.length] = ""
+        console.log(newArray)
         setTypedWords(JSON.parse(JSON.stringify(newArray)))
         document.getElementById("typedString").innerHTML = null
       } else if (e.charCode === 13){ //when Enter is pressed...
@@ -200,6 +201,7 @@ const TypeTest = () => {
         //add "↵" to last element...
         newArray[newArray.length-1] = newArray[newArray.length-1] + "↵"
         newArray[newArray.length] = ""
+        console.log(newArray)
         setTypedWords(JSON.parse(JSON.stringify(newArray)))
         document.getElementById("typedString").innerHTML = null
       } else { //non-Space, non-Enter character registered.
@@ -216,15 +218,15 @@ const TypeTest = () => {
   const typedFunction = () => <>
     {typedWords.length ? typedWords.map((word, index, array)=>(
       word[word.length-1]!=="↵" ? 
-          storyString.split(/↵| /)[index]!==word.slice(0,-1) && index<array.length-1 ?
-            <><span className="red-text" data-mistake="mistake"><u>{word.slice(0,-1)}</u>{" "}</span></>
+          storyString.replace(/↵/g, "↵ ").split(" ")[index]!==word.slice(0,-1) && index<array.length-1 ?
+            <><span className="red-text" data-mistake="mistake"><u>{word}</u>{" "}</span></>
             :<span>{word}</span>
-        : storyString.split(/↵| /)[index]!==word.slice(0,-1) && index<array.length-1 ?
-          <><span className="red-text" data-mistake="mistake"><u>{word.slice(0,-1)}</u></span><br/></>
-          :<><span>{word.slice(0,-1)}</span><br/></>
+        : storyString.replace(/↵/g, "↵ ").split(" ")[index]!==word && index<array.length-1 ?
+          <><span className="red-text" data-mistake="mistake"><u>{word}</u></span><br/></>
+          :<><span>{word}</span><br/></>
     )):null}
   </>
-
+  
 
   //Scroll To Bottom of typing area.
   const typeAreaRef = useRef(null)
