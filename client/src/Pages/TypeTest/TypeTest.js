@@ -12,6 +12,27 @@ const TypeTest = () => {
     setNameState({[e.target.name]: e.target.value, testContent: nameState.testContent})
   }
 
+  //TEST TIMER
+  const [seconds, setSeconds] = useState(60)
+  const [isRunning, setIsRunning] = useState(false)
+  useEffect(()=> {
+    if(isRunning) {
+      const id = window.setInterval(()=>{
+        setSeconds(seconds => seconds-1)
+      },1000)
+      return ()=>window.clearInterval(id)
+      //WHEN we start this running, useEffect is given this CLEANUP function.
+      //this function is called whenever the useEffect happens again (whenever isRunning changes!)
+    }
+  },[isRunning])
+  //test ends.
+  useEffect(()=>{
+    if(seconds<=0){
+      console.log("time's up.")
+      endTest()
+    }
+  },[seconds])
+
   //SCRAPING FUNCTIONS
   async function getArticle(titleArray){
     let title = "Barack_Obama"
@@ -37,17 +58,18 @@ const TypeTest = () => {
     const response = await fetch(url);
     const jsonRes = await response.json();
     // console.log(JSON.stringify(jsonRes));
-    console.log(jsonRes);
-    let scrapedString = Object.values(jsonRes.query.pages)[0].extract
-
-    // console.log(scrapedString)
-    let arr = scrapedString.split("\n")
-    let formattedStory = arr.join("↵")
-    //NOTE TO SELF: could do more formatting to ensure new sentences begin with spaces and we omit any special characters.
-    console.log(formattedStory)
-    setStoryString(formattedStory)
+    // console.log(jsonRes);
     // const jsonText = await response.text();
     // console.log(jsonText)
+    let scrapedString = Object.values(jsonRes.query.pages)[0].extract
+    let arr = scrapedString.split("\n") //replace newline char with return symbol
+    let formattedEssay = arr.join("↵")
+    
+    //replace double spaces with single spaces.
+    //Put a space in front of every period followed immediately by a letter.
+    let formatString = formattedEssay.replace(/ {2}/g, " ").replace(/\.(?=[A-Za-z])/g,". ").replace(/–/g, "-")
+    console.log(formatString)
+    setStoryString(formatString)
   }
 
   //storyString contains the story to be typed. Empty string if no story selected.
@@ -57,6 +79,8 @@ const TypeTest = () => {
   // Story Selection function; sets storyString to the contents of a story to type.
   const storySelected = () => {
     setTypedWords([])
+    setSeconds(3)
+    setIsRunning(false)
     let titleArray = []
     switch (document.getElementById(`storySelect`).value) {
       case `0`:
@@ -72,7 +96,8 @@ const TypeTest = () => {
       ]
         break;
       case `story2`:
-        titleArray = ["George_Washington", "Abraham_Lincoln", "John_Adams", "Barack_Obama", "Thomas_Jefferson"]
+        titleArray = ["President_of_the_United_States", "George_Washington", "Abraham_Lincoln", "John_Adams", "Barack_Obama", "Thomas_Jefferson",
+        "John_F._Kennedy","Lyndon_B._Johnson","Richard_Nixon","Alexander_Hamilton","Benjamin_Franklin","James_Madison",]
         break;
       case `story3`:
         titleArray = ["C._S._Lewis", "J._K._Rowling", "J._R._R._Tolkien", "Lewis_Carroll"]
@@ -148,7 +173,7 @@ const TypeTest = () => {
     // console.log(e.keyCode)
     // console.log(e.key)
     if (e.keyCode === 8){
-      console.log("You pressed Backspace.")
+      // console.log("You pressed Backspace.")
       if (typedWords[0]){
         let newArray = typedWords
         if(typedWords[typedWords.length-1]===""){ //if the last thing typed was space/enter...
@@ -185,6 +210,10 @@ const TypeTest = () => {
         e.preventDefault()
         setTypedWords([e.key])
         document.getElementById("typedString").innerHTML = null
+        //start the timer iff storyString isn't equal to aboutString
+        if(storyString!=aboutString){
+          setIsRunning(true);
+        }
       }
     } else { //typedWords isn't empty
       let newArray = typedWords
@@ -193,7 +222,6 @@ const TypeTest = () => {
         //add " " to last element...
         newArray[newArray.length-1] = newArray[newArray.length-1] + " "
         newArray[newArray.length] = ""
-        console.log(newArray)
         setTypedWords(JSON.parse(JSON.stringify(newArray)))
         document.getElementById("typedString").innerHTML = null
       } else if (e.charCode === 13){ //when Enter is pressed...
@@ -201,7 +229,6 @@ const TypeTest = () => {
         //add "↵" to last element...
         newArray[newArray.length-1] = newArray[newArray.length-1] + "↵"
         newArray[newArray.length] = ""
-        console.log(newArray)
         setTypedWords(JSON.parse(JSON.stringify(newArray)))
         document.getElementById("typedString").innerHTML = null
       } else { //non-Space, non-Enter character registered.
@@ -220,10 +247,10 @@ const TypeTest = () => {
       word[word.length-1]!=="↵" ? 
           storyString.replace(/↵/g, "↵ ").split(" ")[index]!==word.slice(0,-1) && index<array.length-1 ?
             <><span className="red-text" data-mistake="mistake"><u>{word.slice(0,-1)}</u>{" "}</span></>
-            :<span>{word}</span>
+            :<span data-correct="correct">{word}</span>
         : storyString.replace(/↵/g, "↵ ").split(" ")[index]!==word && index<array.length-1 ?
           <><span className="red-text" data-mistake="mistake"><u>{word}</u></span><br/></>
-          :<><span>{word}</span><br/></>
+          :<><span data-correct="correct">{word}</span><br/></>
     )):null}
   </>
   
@@ -237,6 +264,24 @@ const TypeTest = () => {
     }
   }
   useEffect(scrollToBottom, [typedWords])
+
+  const endTest = () =>{
+    setIsRunning(false)
+    setSeconds(0)
+    let countMistakes = document.getElementById("typedWordsDiv").innerHTML.split(`data-mistake="mistake"`).length -1
+    let totalWords
+    if(typedWords[typedWords.length-1]===""){
+      totalWords = typedWords.length-1
+    } else if (storyString.replace(/↵/g, "↵ ").split(" ")[typedWords.length-1] != typedWords[typedWords.length-1]) {
+      totalWords = typedWords.length-1
+    } else {
+      totalWords = typedWords.length
+    }
+    let countCorrect = totalWords - countMistakes
+    console.log("mistakes: " + countMistakes)
+    console.log("correct: "+ countCorrect)
+    console.log("total: " + totalWords)
+  }
 
   return(
     <div className="container">
@@ -264,10 +309,10 @@ const TypeTest = () => {
           }}
           onChange={storySelected}
         >
-          <option value="0" selected>Select Article</option>
+          <option value="0" selected>About David's Typing Test (not a test)</option>
           <option value="story1">US Historic Documents</option>
-          <option value="story2">US Presidents</option>
-          <option value="story3">Famous Authors</option>
+          <option value="story2">US Presidents and Founding Fathers</option>
+          <option value="story3">Famous American and English Authors</option>
           <option value="story4">Physics, Chemistry, and Biology</option>
           <option value="story5">Famous Psychologists</option>
           <option value="story6">Celestial Bodies in our Solar System</option>
@@ -308,7 +353,9 @@ const TypeTest = () => {
         </div>
 
       </div>
-      
+
+      <h5 className={isRunning ? "green-text center":"center"}>Time Remaining: {seconds}</h5>
+
       <div>
         <button onClick={()=>{console.log(typedWords)}}>check typedWords</button>
         <button onClick={()=>{console.log(storyString.split(" "))}}>see storyString</button>
