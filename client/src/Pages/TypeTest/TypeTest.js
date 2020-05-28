@@ -219,7 +219,7 @@ const TypeTest = () => {
     {typedWords.length ? typedWords.map((word, index, array)=>(
       word[word.length-1]!=="↵" ? 
           storyString.replace(/↵/g, "↵ ").split(" ")[index]!==word.slice(0,-1) && index<array.length-1 ?
-            <><span className="red-text" data-mistake="mistake"><u>{word}</u>{" "}</span></>
+            <><span className="red-text" data-mistake="mistake"><u>{word.slice(0,-1)}</u>{" "}</span></>
             :<span>{word}</span>
         : storyString.replace(/↵/g, "↵ ").split(" ")[index]!==word && index<array.length-1 ?
           <><span className="red-text" data-mistake="mistake"><u>{word}</u></span><br/></>
