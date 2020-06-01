@@ -67,20 +67,23 @@ const TypeTest = () => {
     
     //replace double spaces with single spaces.
     //Put a space in front of every period followed immediately by a letter.
-    let formatString = formattedEssay.replace(/ {2}/g, " ").replace(/\.(?=[A-Za-z])/g,". ").replace(/–/g, "-")
+    let formatString = formattedEssay.replace(/ {2}/g, " ").replace(/\.(?=[A-Za-z])/g,". ").replace(/–/g, "-") + "↵"
     console.log(formatString)
     setStoryString(formatString)
   }
 
   //storyString contains the story to be typed. Empty string if no story selected.
-  const aboutString =`About David's Typing Test↵Start by selecting an article category from the dropdown menu. The summary of a random Wikipedia article from the selected category will appear in this text box, and you'll have as much time as you wish to read through its contents before you begin typing. Once you type something into the yellow box, the timer will start and the typing test will commence!↵The word (or character) you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" arrow), the typed words will turn grey. Incorrectly-typed words will show up in underlined, red text in your typing area. You cannot use the arrow keys to move the text cursor, nor can you use keyboard shortcuts such as Control+Shift+LeftArrow or Shift+Home to mass edit previously typed words; however, you are free to press the backspace key to re-type words. You can practice now by typing the words in this tutorial to get a feel for how both the typing area and the article area function!↵The test ends once the timer hits 0 or when the entire article has been typed: whichever comes first. The total number of correctly-typed words will count towards your typing speed. Your typing speed will be measured in words per minute (wpm). Meanwhile, the total number of words typed incorrectly (without being fixed) will adversely affect your accuracy. Your accuracy will be calculated as a percentage: correctly-typed words divided by total number of typed words.↵That's all there is to know about David's Typing test! I hope you enjoy this fun, possibly-educational typing test.`
+  const aboutString =`About David's Typing Test↵Start by selecting an article category and test length from the dropdown menus. The summary of a random Wikipedia article from the selected category will appear in this text box, and you'll have as much time as you wish to read through its contents before you begin the test. Please note that David does not own the content in these tests, and the available articles consist of English-language-only topics due to the nature of this typing test. After selecting an article and perusing its contents, type something into the yellow box to start the timer and the typing test will commence!↵The word (or character) you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" arrow), the typed words will turn grey. Incorrectly-typed words will show up in underlined, red text in your typing area. You cannot use the arrow keys to move the text cursor, nor can you use keyboard shortcuts such as Control+Shift+LeftArrow or Shift+Home to mass edit previously typed words; however, you are free to press the backspace key to re-type words. You can practice now by typing the words in this tutorial to get a feel for how both the typing area and the article area function!↵The test ends once the timer hits 0 or when the entire article has been typed: whichever comes first. The total number of correctly-typed words will count towards your typing speed. Your typing speed will be measured in words per minute (wpm). Meanwhile, the total number of words typed incorrectly (without being fixed) will adversely affect your accuracy. Your accuracy will be calculated as a percentage: correctly-typed words divided by total number of typed words.↵That's all there is to know about David's Typing test! I hope you enjoy this fun, possibly-educational typing test.`
   const [storyString, setStoryString] = useState(aboutString)
 
   // Story Selection function; sets storyString to the contents of a story to type.
   const storySelected = () => {
     setTypedWords([])
-    setSeconds(3)
+    setSeconds(testLength)
+    setBackspaceCount(0)
+    setTestComplete(false)
     setIsRunning(false)
+    setSeeMore(false)
     let titleArray = []
     switch (document.getElementById(`storySelect`).value) {
       case `0`:
@@ -107,7 +110,7 @@ const TypeTest = () => {
         "Gravity", "Chemical_bond", "Molecule", "Chemical_element", "Periodic_table"]
         break;
       case `story5`:
-        titleArray = ["Sigmund_Freud"]
+        titleArray = ["Macbeth", "Romeo_and_Juliet", "William_Shakespeare", "Hamlet", "The_Comedy_of_Errors", "Antony_and_Cleopatra"]
         break;
       case `story6`:
         titleArray = ["Moon", "Jupiter", "Mercury_(planet)", "Venus", "Mars", "Saturn", "Sun","Uranus","Neptune", "Pluto"]
@@ -166,15 +169,26 @@ const TypeTest = () => {
     ))
   }
   </>
-  
-  const [typedWords, setTypedWords] = useState([])
 
+  const [testLength, setTestLength] = useState(60)
+  //This function changes the length of the test.
+  const testTimeSelect = () => {
+    let testLength = document.getElementById("testTimeSelect").value
+    console.log(parseInt(testLength))
+    setTestLength(parseInt(testLength))
+    setSeconds(testLength)
+  }
+
+  const [typedWords, setTypedWords] = useState([])
+  const [totalMistakes, setTotalMistakes] = useState(0)
+  const [backspaceCount, setBackspaceCount] = useState(0)
   const handleKeyDown = (e) =>{//this function will handle special key presses in the typing area.
     // console.log(e.keyCode)
     // console.log(e.key)
     if (e.keyCode === 8){
       // console.log("You pressed Backspace.")
       if (typedWords[0]){
+        setBackspaceCount(backspaceCount=>backspaceCount+1)
         let newArray = typedWords
         if(typedWords[typedWords.length-1]===""){ //if the last thing typed was space/enter...
           let previousWord = newArray[newArray.length-2].length>1 ? 
@@ -221,6 +235,10 @@ const TypeTest = () => {
         e.preventDefault()
         //add " " to last element...
         newArray[newArray.length-1] = newArray[newArray.length-1] + " "
+        if(newArray[newArray.length-1]!=storyString.replace(/↵/g, "↵ ").split(" ")[newArray.length-1]+" "){
+          setTotalMistakes(totalMistakes=>totalMistakes+1)
+          console.log("mistakes:" + totalMistakes)
+        }
         newArray[newArray.length] = ""
         setTypedWords(JSON.parse(JSON.stringify(newArray)))
         document.getElementById("typedString").innerHTML = null
@@ -228,9 +246,18 @@ const TypeTest = () => {
         e.preventDefault()
         //add "↵" to last element...
         newArray[newArray.length-1] = newArray[newArray.length-1] + "↵"
+        if(newArray[newArray.length-1]!=storyString.replace(/↵/g, "↵ ").split(" ")[newArray.length-1]){
+          setTotalMistakes(totalMistakes=>totalMistakes+1)
+          console.log("mistakes:" + totalMistakes)
+        }
         newArray[newArray.length] = ""
         setTypedWords(JSON.parse(JSON.stringify(newArray)))
         document.getElementById("typedString").innerHTML = null
+        //check if you're at the end of the article.
+        if (typedWords.length === storyString.replace(/↵/g, "↵ ").split(" ").length){
+          console.log("Finished test")
+          endTest()
+        }
       } else { //non-Space, non-Enter character registered.
         e.preventDefault()
         newArray[newArray.length-1] = newArray[newArray.length-1] + e.key
@@ -265,9 +292,30 @@ const TypeTest = () => {
   }
   useEffect(scrollToBottom, [typedWords])
 
+  //testTimer
+  const testTimer = 
+  <>
+    <div>
+      <h5 className="purple-text center">Time Remaining: {seconds}</h5>
+    </div>
+  </>
+
+//END OF TEST STATISTICS
+  const [testComplete, setTestComplete] = useState(false) //set to true when endTest.
+  const [netMistakes, setNetMistakes] = useState(0) //number of UNFIXED mistakes.
+  const [finalSpeed, setFinalSpeed] = useState(0) //correctly-typed words / timeTaken.
+  const [finalAccuracy, setFinalAccuracy] = useState(0) //correctly-typed words / typedTotal
+  const [totalAccuracy, setTotalAccuracy] = useState(0) //correctly-typed words / typedTotal
+
+  const [typedTotal, setTypedTotal] = useState(0) //number of words typed.
+  const [timeTaken, setTimeTaken] = useState(60) //time taken; usually equal to testLength.
+  const [typedChars, setTypedChars] = useState(0) //number of characters typed.
+
+  const [seeMore, setSeeMore]=useState(false)
   const endTest = () =>{
+    setTestComplete(true)
     setIsRunning(false)
-    setSeconds(0)
+    // setSeconds(0)
     let countMistakes = document.getElementById("typedWordsDiv").innerHTML.split(`data-mistake="mistake"`).length -1
     let totalWords
     if(typedWords[typedWords.length-1]===""){
@@ -278,46 +326,90 @@ const TypeTest = () => {
       totalWords = typedWords.length
     }
     let countCorrect = totalWords - countMistakes
-    console.log("mistakes: " + countMistakes)
-    console.log("correct: "+ countCorrect)
-    console.log("total: " + totalWords)
+
+    let countCharacters = 0
+    typedWords.forEach(word => {
+      countCharacters += word.length
+    })
+    setTypedChars(countCharacters)
+    // console.log("total mistakes: "+ totalMistakes)
+    // console.log("mistakes: " + countMistakes)
+    // console.log("correct: "+ countCorrect)
+    // console.log("total: " + totalWords)
+    setTypedTotal(totalWords)
+    setNetMistakes(countMistakes)
+    setTotalAccuracy((totalWords-totalMistakes)/totalWords)
+    setFinalAccuracy(countCorrect / totalWords)
+    
+    if(seconds === 0){
+      setTimeTaken(testLength)
+      setFinalSpeed(countCorrect / testLength * 60)
+    } else {
+      setTimeTaken(testLength-seconds)
+      setFinalSpeed(countCorrect / (testLength-seconds)*60)
+    }
+  }
+  const showAdditional = (e)=>{
+    e.preventDefault()
+    setSeeMore(!seeMore)
+  }
+  const submitResults = (e) => {
+    e.preventDefault()
+    console.log("results submitted")
   }
 
   return(
     <div className="container">
-      <h1 className="center">Take the Typing Test</h1>
+      <h3 className="center">Take the Typing Test</h3>
       
       {/* USERNAME + STORY SELECT*/}
       <div className="row">
-        {/* Name input */}
-        <div className="input-field">
-          <input className="black-text" placeholder="Your username" type="text" 
-            id="username" name="username" value={nameState.username} onChange={nameState.handleInputChange} />
+        <div className="col s12 m8 l8">
+          {/* select a Story */}
+          <select
+            className="browser-default"  id="storySelect"
+            options={{
+              classes: '', dropdownOptions: {
+                alignment: 'left',
+                autoTrigger: true, closeOnClick: true, constrainWidth: true,
+                container: null, coverTrigger: true, hover: false,
+                inDuration: 150, onCloseEnd: null, onCloseStart: null,
+                onOpenEnd: null, onOpenStart: null, outDuration: 250
+              }
+            }}
+            onChange={storySelected}
+          >
+            <option value="0" disabled selected>About David's Typing Test (not a test)</option>
+            <option value="story1">On US Historic Documents</option>
+            <option value="story2">On US Presidents and Founding Fathers</option>
+            <option value="story3">On Famous American and English Authors</option>
+            <option value="story4">On Physics, Chemistry, and Biology</option>
+            <option value="story5">On William Shakespeare</option>
+            <option value="story6">On Celestial Bodies in our Solar System</option>
+            <option value="story7">On DC Comics Characters</option>
+          </select>
         </div>
-
-        {/* select a Story */}
-        <select
-          className="browser-default"  id="storySelect"
-          options={{
-            classes: '', dropdownOptions: {
-              alignment: 'left',
-              autoTrigger: true, closeOnClick: true, constrainWidth: true,
-              container: null, coverTrigger: true, hover: false,
-              inDuration: 150, onCloseEnd: null, onCloseStart: null,
-              onOpenEnd: null, onOpenStart: null, outDuration: 250
-            }
-          }}
-          onChange={storySelected}
-        >
-          <option value="0" selected>About David's Typing Test (not a test)</option>
-          <option value="story1">US Historic Documents</option>
-          <option value="story2">US Presidents and Founding Fathers</option>
-          <option value="story3">Famous American and English Authors</option>
-          <option value="story4">Physics, Chemistry, and Biology</option>
-          <option value="story5">Famous Psychologists</option>
-          <option value="story6">Celestial Bodies in our Solar System</option>
-          <option value="story7">DC Comics Characters</option>
-        </select>
+        <div className="col s12 m4 l4">
+          {/* SELECT TEST LENGTH */}
+          <select
+            className="browser-default"  id="testTimeSelect"
+            options={{
+              classes: '', dropdownOptions: {
+                alignment: 'left',
+                autoTrigger: true, closeOnClick: true, constrainWidth: true,
+                container: null, coverTrigger: true, hover: false,
+                inDuration: 150, onCloseEnd: null, onCloseStart: null,
+                onOpenEnd: null, onOpenStart: null, outDuration: 250
+              }
+            }}
+            onChange={testTimeSelect}
+          >
+            <option value="60" disabled selected>Select Test Length</option>
+            <option value="30">30 Seconds</option>
+            <option value="60">One Minute</option>
+            <option value="120">Two Minutes</option>
+          </select>
+        </div>
 
       </div>
 
@@ -353,17 +445,45 @@ const TypeTest = () => {
         </div>
 
       </div>
+      
+      {isRunning || !testComplete ? testTimer:<><br/></>}
 
-      <h5 className={isRunning ? "green-text center":"center"}>Time Remaining: {seconds}</h5>
-
-      <div>
-        <button onClick={()=>{console.log(typedWords)}}>check typedWords</button>
-        <button onClick={()=>{console.log(storyString.split(" "))}}>see storyString</button>
-        <button onClick={()=>{console.log(document.getElementById("typedWordsDiv").innerHTML)}}>seeTypedWordsDiv</button>
-        <button onClick={()=>{console.log(document.getElementById("typedWordsDiv").innerHTML.split(`data-mistake="mistake"`).length -1)}}>countMistakes</button>
-        {/* <button onClick={getArticle}>get article</button> */}
-        {/* <button onClick={getTitle}>get title</button> */}
+      <div className="row purple lighten-2 white-text center"
+        style={testComplete ? {visibility:"visible", borderWidth:"3px", borderStyle:"double"}:{visibility:"hidden"}}>
+          <h4 className="center"><u>Test Results</u></h4>
+          <div className="col s6 m6 l6 center">
+            <h5 id="totalWords">Words Typed: {typedTotal}</h5>
+            <h5 id="showAccuracy"><b>Accuracy: {Math.round(finalAccuracy*10000)/100}%</b></h5>
+          </div>
+          <div className="col s6 m6 l6 center">
+            <h5 id="showMistakes">Net Mistakes: {netMistakes}</h5>
+            <h5 id="finalSpeed"><b>Speed: {finalSpeed} wpm</b></h5>
+          </div>
+        {/* OTHER STATS */}
+        {seeMore ? <>
+          <div>
+            <div className="col s6 m6 l6 center blue lighten-2">
+              <h6 id="typedChars"><i>Typed Characters:</i> {typedChars}</h6>
+              <h6 id="backspaceCount"><i>Backspace Count:</i> {backspaceCount}</h6>
+              <h6 id="charSpeed"><i>Speed (characters per minute):</i> {typedChars / timeTaken * 60}</h6>
+            </div>
+            <div className="col s6 m6 l6 center blue lighten-2">
+              <h6 id="totalMistakes"><i>Total Mistakes (including fixed):</i> {totalMistakes}</h6>
+              <h6 id="totalAccuracy"><i>Typing Accuracy:</i> {Math.round(totalAccuracy*10000)/100}%</h6>
+              <h6 id="totalSpeed"><i>Typing Speed (including mistakes):</i> {typedTotal / timeTaken * 60} wpm</h6>
+            </div>
+          </div>
+        </>:<></>}
+        <h6><a className="blue-text text-lighten-2" onClick={showAdditional}>{seeMore ? "Hide Additional Results":"Show Additional Results"}</a></h6>
+          <div className="input-field col s12 m10 l10">
+            <input className="white black-text center" placeholder="Your username" type="text" 
+              id="username" name="username" value={nameState.username} onChange={nameState.handleInputChange} />
+          </div>
+          <div className="input-field col s12 m2 l2 center" style={{paddingTop:"1%"}}>
+            <button className="btn-small black white-text" onClick={submitResults}>Submit Results</button>
+          </div>
       </div>
+      
     </div>
   )
 }
