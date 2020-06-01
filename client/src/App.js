@@ -7,6 +7,7 @@ import {
 import Navbar from './Components/Navbar'
 import './App.css';
 import Home from './Pages/Home';
+import Leaderboards from './Pages/Leaderboards';
 import TypeTest from './Pages/TypeTest';
 
 const App = () => {
@@ -23,7 +24,7 @@ const App = () => {
       <Switch>
         <Route exact path="/leaderboards">
           <Navbar/>
-          {/* <Home /> */}
+          <Leaderboards />
         </Route>
       </Switch>
 

@@ -5,7 +5,10 @@ import UserAPI from '../../utils/ScoreAPI'; //for sending results to db
 import "./TypeTest.css"
 import axios from 'axios';
 
+const {addScore} = UserAPI
+
 const TypeTest = () => {
+
   // nameState contains username. that's it.
   const [nameState, setNameState] = useState({username: ""})
   nameState.handleInputChange = (e) => {
@@ -33,6 +36,7 @@ const TypeTest = () => {
     }
   },[seconds])
 
+  const [testArticle, setTestArticle] = useState("article title")
   //SCRAPING FUNCTIONS
   async function getArticle(titleArray){
     let title = "Barack_Obama"
@@ -40,6 +44,7 @@ const TypeTest = () => {
       title = titleArray[Math.floor(Math.random()*titleArray.length)]
     }
     console.log(title)
+    setTestArticle(title.split("_").join(" "))
     let url = "https://en.wikipedia.org/w/api.php"; 
     let params = {
         action: "query",
@@ -355,8 +360,20 @@ const TypeTest = () => {
   }
   const submitResults = (e) => {
     e.preventDefault()
-    console.log("results submitted")
+    addScore({username: nameState, speed: finalSpeed, accuracy: finalAccuracy, article: testArticle})
+      .then(()=>{
+        console.log("okay")
+      })
+      .catch(e=>console.error(e))
   }
+  // const dummyPost = (e) => {
+  //   e.preventDefault()
+  //   addScore({username: "davidwu92", speed: 100, accuracy: 1, article: "hello world"})
+  //     .then(()=>{
+  //       console.log("okay")
+  //     })
+  //     .catch(e=>console.error(e))
+  // }
 
   return(
     <div className="container">
@@ -484,6 +501,7 @@ const TypeTest = () => {
           </div>
       </div>
       
+      {/* <button onClick={dummyPost}>DUMMY POST</button> */}
     </div>
   )
 }

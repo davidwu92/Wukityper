@@ -25,25 +25,6 @@ app.use(express.static(join(__dirname, 'client', 'build')))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-// // passport middleware
-// app.use(passport.initialize())
-// app.use(passport.session())
-
-// // Passport Boilerplate code
-// passport.use(new Strategy(User.authenticate()))
-// passport.serializeUser(User.serializeUser())
-// passport.deserializeUser(User.deserializeUser())
-
-// // grabbing the token authentication process
-// passport.use(new JWTStrategy({
-//   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-//   secretOrKey: process.env.SECRET
-//   }, ({ id }, cb) => User.findById(id)
-//       .then(user => cb(null, user))
-//       .catch(e => cb(e))
-//     )
-// )
-
 //routes
 require('./routes')(app)
 

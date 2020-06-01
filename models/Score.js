@@ -1,9 +1,10 @@
 module.exports = (model, Schema) =>{
-  const Sticker = new Schema({
-    name: String,
+  const Score = new Schema({
+    username: String,
     speed: Number,
     accuracy: Number,
+    article: String,
   })
 
-  return model('Sticker', Sticker)
+  return model('Score', Score)
 }
