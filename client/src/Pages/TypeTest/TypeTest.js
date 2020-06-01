@@ -4,15 +4,17 @@ import UserAPI from '../../utils/ScoreAPI'; //for sending results to db
 // import { set } from 'mongoose';
 import "./TypeTest.css"
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const {addScore} = UserAPI
 
 const TypeTest = () => {
-
+  toast.configure()
   // nameState contains username. that's it.
   const [nameState, setNameState] = useState({username: ""})
   nameState.handleInputChange = (e) => {
-    setNameState({[e.target.name]: e.target.value, testContent: nameState.testContent})
+    setNameState({[e.target.name]: e.target.value})
   }
 
   //TEST TIMER
@@ -78,7 +80,7 @@ const TypeTest = () => {
   }
 
   //storyString contains the story to be typed. Empty string if no story selected.
-  const aboutString =`About David's Typing Test↵Start by selecting an article category and test length from the dropdown menus. The summary of a random Wikipedia article from the selected category will appear in this text box, and you'll have as much time as you wish to read through its contents before you begin the test. Please note that David does not own the content in these tests, and the available articles consist of English-language-only topics due to the nature of this typing test. After selecting an article and perusing its contents, type something into the yellow box to start the timer and the typing test will commence!↵The word (or character) you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" arrow), the typed words will turn grey. Incorrectly-typed words will show up in underlined, red text in your typing area. You cannot use the arrow keys to move the text cursor, nor can you use keyboard shortcuts such as Control+Shift+LeftArrow or Shift+Home to mass edit previously typed words; however, you are free to press the backspace key to re-type words. You can practice now by typing the words in this tutorial to get a feel for how both the typing area and the article area function!↵The test ends once the timer hits 0 or when the entire article has been typed: whichever comes first. The total number of correctly-typed words will count towards your typing speed. Your typing speed will be measured in words per minute (wpm). Meanwhile, the total number of words typed incorrectly (without being fixed) will adversely affect your accuracy. Your accuracy will be calculated as a percentage: correctly-typed words divided by total number of typed words.↵That's all there is to know about David's Typing test! I hope you enjoy this fun, possibly-educational typing test.`
+  const aboutString =`About David's Typing Test↵Start by selecting an article category and test length from the dropdown menus. The summary of a random Wikipedia article from the selected category will appear in this text box, and you'll have as much time as you wish to read through its contents before you begin the test. Please note that David does not own the content in these tests, and the available articles consist of English-language-only topics due to the nature of this typing test. After selecting an article and perusing its contents, type something into the yellow box to start the timer and the typing test will commence!↵The word (or character) you must type will appear in green. As you type words separated by spaces or line breaks (marked with the "return" arrow), the typed words will turn grey. Incorrectly-typed words will show up in underlined, red text in your typing area. You cannot use the arrow keys to move the text cursor, nor can you use keyboard shortcuts such as Control+Shift+LeftArrow or Shift+Home to mass edit previously typed words; however, you are free to press the backspace key to re-type words. You can practice now by typing the words in this tutorial to get a feel for how both the typing area and the article area function!↵The test ends once the timer hits 0 or when the entire article has been typed: whichever comes first. The total number of correctly-typed words will count towards your typing speed. Your typing speed will be measured in words per minute (wpm). Meanwhile, the total number of words typed incorrectly (without being fixed) will adversely affect your accuracy. Your accuracy will be calculated as a percentage: correctly-typed words divided by total number of typed words.↵That's all there is to know about David's Typing test! I hope you enjoy this fun, possibly-educational typing test.↵`
   const [storyString, setStoryString] = useState(aboutString)
 
   // Story Selection function; sets storyString to the contents of a story to type.
@@ -89,6 +91,7 @@ const TypeTest = () => {
     setTestComplete(false)
     setIsRunning(false)
     setSeeMore(false)
+    setScoreSubmitted(false)
     let titleArray = []
     switch (document.getElementById(`storySelect`).value) {
       case `0`:
@@ -316,6 +319,7 @@ const TypeTest = () => {
   const [timeTaken, setTimeTaken] = useState(60) //time taken; usually equal to testLength.
   const [typedChars, setTypedChars] = useState(0) //number of characters typed.
 
+  const [scoreSubmitted, setScoreSubmitted]=useState(false)
   const [seeMore, setSeeMore]=useState(false)
   const endTest = () =>{
     setTestComplete(true)
@@ -360,20 +364,23 @@ const TypeTest = () => {
   }
   const submitResults = (e) => {
     e.preventDefault()
-    addScore({username: nameState, speed: finalSpeed, accuracy: finalAccuracy, article: testArticle})
-      .then(()=>{
-        console.log("okay")
-      })
-      .catch(e=>console.error(e))
+    console.log(nameState.username)
+    if(nameState.username.length){
+      if(scoreSubmitted===false){
+        toast(`You submitted your test results under the username "${nameState.username}".`,
+        {autoClose: 5000,hideProgressBar: true,type: "success"})
+        addScore({username: nameState.username, speed: finalSpeed, accuracy: finalAccuracy, article: testArticle})
+          .then(()=>{
+            console.log("okay")
+          })
+          .catch(e=>console.error(e))
+        setScoreSubmitted(true)
+      }
+    } else {
+      toast(`You must provide a username.`,
+      {autoClose: 5000,hideProgressBar: true,type: "error"})
+    }
   }
-  // const dummyPost = (e) => {
-  //   e.preventDefault()
-  //   addScore({username: "davidwu92", speed: 100, accuracy: 1, article: "hello world"})
-  //     .then(()=>{
-  //       console.log("okay")
-  //     })
-  //     .catch(e=>console.error(e))
-  // }
 
   return(
     <div className="container">
@@ -383,6 +390,29 @@ const TypeTest = () => {
       <div className="row">
         <div className="col s12 m8 l8">
           {/* select a Story */}
+          { isRunning ? <select
+            className="browser-default"  id="storySelect"
+            disabled
+            options={{
+              classes: '', dropdownOptions: {
+                alignment: 'left',
+                autoTrigger: true, closeOnClick: true, constrainWidth: true,
+                container: null, coverTrigger: true, hover: false,
+                inDuration: 150, onCloseEnd: null, onCloseStart: null,
+                onOpenEnd: null, onOpenStart: null, outDuration: 250,
+              }
+            }}
+          >
+            <option value="0" disabled selected>About David's Typing Test (not a test)</option>
+            <option value="story1">On US Historic Documents</option>
+            <option value="story2">On US Presidents and Founding Fathers</option>
+            <option value="story3">On Famous American and English Authors</option>
+            <option value="story4">On Physics, Chemistry, and Biology</option>
+            <option value="story5">On William Shakespeare</option>
+            <option value="story6">On Celestial Bodies in our Solar System</option>
+            <option value="story7">On DC Comics Characters</option>
+          </select>
+          :
           <select
             className="browser-default"  id="storySelect"
             options={{
@@ -391,7 +421,7 @@ const TypeTest = () => {
                 autoTrigger: true, closeOnClick: true, constrainWidth: true,
                 container: null, coverTrigger: true, hover: false,
                 inDuration: 150, onCloseEnd: null, onCloseStart: null,
-                onOpenEnd: null, onOpenStart: null, outDuration: 250
+                onOpenEnd: null, onOpenStart: null, outDuration: 250,
               }
             }}
             onChange={storySelected}
@@ -404,11 +434,31 @@ const TypeTest = () => {
             <option value="story5">On William Shakespeare</option>
             <option value="story6">On Celestial Bodies in our Solar System</option>
             <option value="story7">On DC Comics Characters</option>
-          </select>
+          </select>}
         </div>
         <div className="col s12 m4 l4">
           {/* SELECT TEST LENGTH */}
-          <select
+          {isRunning ? <select
+            className="browser-default"  id="testTimeSelect"
+            disabled
+            options={{
+              classes: '', dropdownOptions: {
+                alignment: 'left',
+                autoTrigger: true, closeOnClick: true, constrainWidth: true,
+                container: null, coverTrigger: true, hover: false,
+                inDuration: 150, onCloseEnd: null, onCloseStart: null,
+                onOpenEnd: null, onOpenStart: null, outDuration: 250
+              }
+            }}
+            onChange={testTimeSelect}
+          >
+            <option value="60" disabled selected>Select Test Length</option>
+            {/* <option value="1">1 Second</option> */}
+            <option value="30">30 Seconds</option>
+            <option value="60">One Minute</option>
+            <option value="120">Two Minutes</option>
+          </select>
+          :<select
             className="browser-default"  id="testTimeSelect"
             options={{
               classes: '', dropdownOptions: {
@@ -422,10 +472,11 @@ const TypeTest = () => {
             onChange={testTimeSelect}
           >
             <option value="60" disabled selected>Select Test Length</option>
+            {/* <option value="1">1 Second</option> */}
             <option value="30">30 Seconds</option>
             <option value="60">One Minute</option>
             <option value="120">Two Minutes</option>
-          </select>
+          </select>}
         </div>
 
       </div>
@@ -492,12 +543,18 @@ const TypeTest = () => {
           </div>
         </>:<></>}
         <h6><a className="blue-text text-lighten-2" onClick={showAdditional}>{seeMore ? "Hide Additional Results":"Show Additional Results"}</a></h6>
-          <div className="input-field col s12 m10 l10">
+          <div className="input-field col s12 m10 l9 center">
             <input className="white black-text center" placeholder="Your username" type="text" 
               id="username" name="username" value={nameState.username} onChange={nameState.handleInputChange} />
           </div>
-          <div className="input-field col s12 m2 l2 center" style={{paddingTop:"1%"}}>
-            <button className="btn-small black white-text" onClick={submitResults}>Submit Results</button>
+          <div className="input-field col s12 m2 l3 center" style={{paddingTop:"1%"}}>
+            <button onClick={submitResults} 
+              className={scoreSubmitted ? "btn-small black white-text disabled":"btn-small black white-text"}>
+              Submit Results
+            </button>
+          </div>
+          <div className="input-field col s12 m12 l12">
+            <button onClick={storySelected} className="btn-small black white-text">Take Another Test</button>
           </div>
       </div>
       

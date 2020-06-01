@@ -6,9 +6,6 @@ const {allScores} = UserAPI
 
 const Leaderboards = () => {
   let history = useHistory()
-  // const goToTypeTest = () => {
-  //   history.push('/typetest')
-  // }
 
   const [scores, setScores] = useState([])
   
@@ -16,14 +13,37 @@ const Leaderboards = () => {
     allScores()
     .then(({data})=>{
       console.log(data)
+      setScores(data)
     })
     .catch(e=>console.error(e))
   },[])
 
   return(
     <div className="container">
-      <h3>Leaderboards</h3>
-      
+      <h3 className="center">Leaderboards</h3>
+      <table className="centered responsive-table">
+        <thead>
+          <tr className="blue lighten-4 blue-grey-text text-darken-4">
+            {/* <th>Game #</th> */}
+            <th>Username</th>
+            <th>Speed (wpm)</th>
+            <th>Accuracy</th>
+            <th>Article Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          {scores.length ? scores.map((score, index)=>(
+            <tr className={index%2? "grey lighten-4":"grey lighten-3"}>
+              <td>{score.username}</td>
+              <td>{score.speed}</td>
+              <td>{Math.round(score.accuracy*10000)/100}%</td>
+              <td>{score.article}</td>
+            </tr>
+          )):null}
+        </tbody>
+      </table>
+
+
     </div>
   )
 }
