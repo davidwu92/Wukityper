@@ -6,9 +6,9 @@ const {allScores} = UserAPI
 
 const Leaderboards = () => {
   let history = useHistory()
-  const goToTypeTest = () => {
-    history.push('/typetest')
-  }
+  // const goToTypeTest = () => {
+  //   history.push('/typetest')
+  // }
 
   const [scores, setScores] = useState([])
   
@@ -23,6 +23,7 @@ const Leaderboards = () => {
   return(
     <div className="container">
       <h3>Leaderboards</h3>
+      
     </div>
   )
 }
