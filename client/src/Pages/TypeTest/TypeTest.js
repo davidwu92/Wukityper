@@ -557,8 +557,6 @@ const TypeTest = () => {
             <button onClick={storySelected} className="btn-small black white-text">Take Another Test</button>
           </div>
       </div>
-      
-      {/* <button onClick={dummyPost}>DUMMY POST</button> */}
     </div>
   )
 }

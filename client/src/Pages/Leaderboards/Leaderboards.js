@@ -13,7 +13,8 @@ const Leaderboards = () => {
     allScores()
     .then(({data})=>{
       console.log(data)
-      setScores(data)
+      let arr = data.sort((a,b)=>(a.speed < b.speed)? 1 : (a.speed === b.speed) ? ((a.accuracy < b.accuracy)? 1:-1): -1)
+      setScores(arr)
     })
     .catch(e=>console.error(e))
   },[])
@@ -24,7 +25,6 @@ const Leaderboards = () => {
       <table className="centered responsive-table">
         <thead>
           <tr className="blue lighten-4 blue-grey-text text-darken-4">
-            {/* <th>Game #</th> */}
             <th>Username</th>
             <th>Speed (wpm)</th>
             <th>Accuracy</th>
