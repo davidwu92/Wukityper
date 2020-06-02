@@ -543,16 +543,19 @@ const TypeTest = () => {
           </div>
         </>:<></>}
         <h6><a className="blue-text text-lighten-2" onClick={showAdditional}>{seeMore ? "Hide Additional Results":"Show Additional Results"}</a></h6>
-          <div className="input-field col s12 m10 l9 center">
-            <input className="white black-text center" placeholder="Your username" type="text" 
-              id="username" name="username" value={nameState.username} onChange={nameState.handleInputChange} />
-          </div>
-          <div className="input-field col s12 m2 l3 center" style={{paddingTop:"1%"}}>
-            <button onClick={submitResults} 
-              className={scoreSubmitted ? "btn-small black white-text disabled":"btn-small black white-text"}>
-              Submit Results
-            </button>
-          </div>
+          {totalAccuracy > 0.9 ? 
+            <>
+              <div className="input-field col s12 m10 l9 center">
+                <input className="white black-text center" placeholder="Your username" type="text" 
+                  id="username" name="username" value={nameState.username} onChange={nameState.handleInputChange} />
+              </div>
+              <div className="input-field col s12 m2 l3 center" style={{paddingTop:"1%"}}>
+                <button onClick={submitResults} 
+                  className={scoreSubmitted ? "btn-small black white-text disabled":"btn-small black white-text"}>
+                  Submit Results
+                </button>
+              </div>
+            </>:null}
           <div className="input-field col s12 m12 l12">
             <button onClick={storySelected} className="btn-small black white-text">Take Another Test</button>
           </div>
