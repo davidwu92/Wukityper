@@ -19,13 +19,13 @@ const Home = () => {
         <h5>About David Wu</h5>
         <p style={{textIndent: "30px"}}>I'm a freelance full-stack web developer and STEM teacher/tutor based in Irvine, California. I graduated from the UC Irvine Coding Bootcamp in February 2020, and spend my days honing my coding skills and building unique web applications. Unsurprisingly, I hold many of the Leaderboard positions, so why not see if you can type faster than me?</p>
         <p className="center">Visit other applications I've created by going to my portfolio or my Github. I'm very open to career opportunities, so connect with me on LinkedIn!</p>
-        <div className="col s4 m4 l4 center">
+        <div className="col s12 m4 l4 center" style={{marginBottom:"15px"}}>
           <a href="http://davidwu.herokuapp.com" target="_blank" className="btn-small black">David's Online Portfolio</a>
         </div>
-        <div className="col s4 m4 l4 center">
+        <div className="col s12 m4 l4 center"  style={{marginBottom:"15px"}}>
           <a href="https://github.com/davidwu92" target="_blank" className="btn-small black">David's Github Profile</a>
         </div>
-        <div className="col s4 m4 l4 center">
+        <div className="col s12 m4 l4 center"  style={{marginBottom:"15px"}}>
           <a href="https://www.linkedin.com/in/davidwu92/" target="_blank" className="btn-small black">David's LinkedIn</a>
         </div>
         <br/>
