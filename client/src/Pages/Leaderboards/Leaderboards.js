@@ -21,10 +21,11 @@ const Leaderboards = () => {
 
   return(
     <div className="container">
-      <h3 className="center">Leaderboards</h3>
+      <h3 className="center">Top 50 Leaderboards</h3>
       <table className="centered responsive-table">
         <thead>
           <tr className="blue lighten-4 blue-grey-text text-darken-4">
+            <th>Rank</th>
             <th>Username</th>
             <th>Speed (wpm)</th>
             <th>Accuracy</th>
@@ -32,8 +33,9 @@ const Leaderboards = () => {
           </tr>
         </thead>
         <tbody>
-          {scores.length ? scores.map((score, index)=>(
+          {scores.length ? scores.slice(0,50).map((score, index)=>(
             <tr className={index%2? "grey lighten-4":"grey lighten-3"}>
+              <td>{index+1}</td>
               <td>{score.username}</td>
               <td>{score.speed}</td>
               <td>{Math.round(score.accuracy*10000)/100}%</td>

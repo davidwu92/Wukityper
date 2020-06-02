@@ -6,7 +6,7 @@ const Navbar = () => {
   return (
     <nav className="nav-extended black">
       <div className="nav-wrapper" id="navWrapper">
-        <div className="brand-logo" id="navTitle"><Link to="/">Typing Test</Link></div>
+        <div className="brand-logo" id="navTitle"><Link to="/">WukiTyper</Link></div>
       </div>
       <div className="nav-content">
         <ul className="tabs tabs-transparent">
