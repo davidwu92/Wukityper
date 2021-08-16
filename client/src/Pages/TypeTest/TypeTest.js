@@ -352,10 +352,10 @@ const TypeTest = () => {
     
     if(seconds === 0){
       setTimeTaken(testLength)
-      setFinalSpeed(countCorrect / testLength * 60)
+      setFinalSpeed(Math.round(countCorrect / testLength * 600)/10)
     } else {
       setTimeTaken(testLength-seconds)
-      setFinalSpeed(countCorrect / (testLength-seconds)*60)
+      setFinalSpeed(Math.round(countCorrect / (testLength-seconds)*600)/10)
     }
   }
   const showAdditional = (e)=>{
