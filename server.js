@@ -6,6 +6,8 @@ const app = express()
 // const passport = require('passport')
 // const { Strategy } = require('passport-local')
 
+// mongodb+srv://davidwu92:GvVdUU0IBOZgSSgL@davidportfoliocluster.cnri8.mongodb.net/TypeTestdb?retryWrites=true&w=majority
+
 //DEPLOYING TO HEROKU
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("client/build"))
